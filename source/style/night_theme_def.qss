@@ -1,0 +1,36 @@
+/* set style parameters from GUI */
+QMainWindow {
+    background-color: #d1d1d1;
+}
+
+/* set font-family */
+QMenuBar, QMenu, QHeaderView::section{
+    font-family: Ubuntu;
+}
+
+/* MenuBar parameters */
+QMenuBar, QMenu, QHeaderView::section {
+    font-size: 12pt;
+}
+QMenuBar::item, QMenu, QTabBar::tab{
+    color: #333333;
+    background: #d1d1d1;
+}
+QMenuBar {
+    border: 2px solid #d1d1d1;
+}
+QMenuBar::item {
+    padding: 1px;
+}
+QMenu {
+    border: 0px inset #292f42;
+}
+QMenu::separator {
+    height: 1px;
+    background: #b5b5b5;
+    margin-left: 10px;
+    margin-right: 5px;
+}
+QMenuBar::item::pressed, QTabBar::tab:selected, QMenu::item:selected {
+    background: #b5b5b5;
+}
