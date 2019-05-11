@@ -34,3 +34,50 @@ QMenu::separator {
 QMenuBar::item::pressed, QTabBar::tab:selected, QMenu::item:selected {
     background: #b5b5b5;
 }
+
+/* Timeline stylesheet */
+
+QGraphicsView#Timeline {
+    background-color : #D0D0D0;
+    background-color : red;
+}
+
+QFrame#Task {
+    background-color : #A3A3A3;
+}
+
+QFrame#BufferSet {
+    background-color: #EBEBEB;
+
+}
+QFrame#BufferParam {
+    background-color: #A3A3A3;
+}
+
+/* Act widget settings */
+
+    QFrame#Act {
+        background-color: orange;
+        border-radius: 12px;
+    }
+    QLabel#ActName {
+        font-family: Ubuntu;
+        font-size: 36pt;
+        color: white;
+    }
+    QLabel#ActLbl {
+        font-family: Ubuntu;
+        font-size: 22pt;
+        color: white;
+    }
+    QLabel#CommentLbl {
+        font-family: Ubuntu;
+        font-size: 14pt;
+        color: white;
+    }
+
+    QLabel#Status {
+        font-family: Ubuntu;
+        font-size: 14pt;
+        color: white;
+    }
