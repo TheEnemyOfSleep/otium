@@ -1,5 +1,6 @@
 from PySide2 import QtWidgets, QtCore, QtGui
 
+
 class TimeObject(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -41,11 +42,11 @@ class TimelineWidget(QtWidgets.QWidget):
         blackPen = QtGui.QPen(QtGui.QColor('#424242'))
         blackPen.setWidth(2)
 
-        rect_item = ActItem(QtCore.QRectF(0, 30, 400, 115))
+        rect_item = ActItem(QtCore.QRectF(0, 30, 300, 115), color=QtGui.QColor('#A33CDE'))
 
         self.scene.addItem(rect_item)
 
-        timeline_line = self.scene.addLine(345, 0, 345, 145)
+        timeline_line = self.scene.addLine(345, 0, 345, 145, blackPen)
         timeline_line.setZValue(100)
 
     def resizeEvent(self, *args, **kwargs):
@@ -58,8 +59,8 @@ class TimelineWidget(QtWidgets.QWidget):
 
 
 class ActItem(QtWidgets.QGraphicsRectItem):
-    def __init__(self, rect, option=QtWidgets.QStyleOptionGraphicsItem(), widget=None):
-        super().__init__(rect, option=QtWidgets.QStyleOptionGraphicsItem(), widget=None)
+    def __init__(self, rect, **kwargs):
+        super().__init__(rect)
         self.rect = rect
 
         # Set flags
@@ -67,34 +68,42 @@ class ActItem(QtWidgets.QGraphicsRectItem):
         self.setFlag(QtWidgets.QGraphicsItem.ItemIsSelectable, True)
         self.setFlag(QtWidgets.QGraphicsItem.ItemIsFocusable, True)
 
+        # Action item parameters
+        self.color = QtGui.QColor(QtCore.Qt.red)
+
+        # Parameters for ActionItem
+        for key, value in kwargs.items():
+            if str(key) == 'color' or key == 'background':
+                self.color = value
+
         # Set flag for itemChange function;
         self.setFlag(QtWidgets.QGraphicsItem.ItemSendsGeometryChanges, True)
         # print('x:{}, y:{}, width:{}, height:{}'.format(rect.x(), rect.y(), rect.width(), rect.height()))
 
     def paint(self, painter=QtGui.QPainter(), option=QtWidgets.QStyleOptionGraphicsItem(), widget=None):
         # Draw item element for graphics item
-        brush = QtGui.QBrush(QtGui.QColor('#A33CDE'))
-        txt_brush = QtGui.QBrush(QtGui.QColor(QtCore.Qt.white))
+        brush = QtGui.QBrush(self.color)
         painter.setRenderHint(QtGui.QPainter.HighQualityAntialiasing)
 
+        padding = 10
         # Draw main block
         painter.setBrush(brush)
         painter.setPen(QtCore.Qt.NoPen)
         painter.drawRoundedRect(self.rect, float(12), float(12.0))
 
-        padding = 10
+
 
         # Draw action name lbl
         painter.setPen(QtCore.Qt.white)
-        painter.setFont(QtGui.QFont("Ubuntu", 36))
-        painter.drawText(self.rect.x() + padding, self.rect.y(),
+        painter.setFont(QtGui.QFont("Ubuntu", 22))
+        painter.drawText(self.rect.x() + padding, self.rect.y() + padding,
                          self.rect.width() - padding, self.rect.height(),
-                         QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop, "Name")
+                         QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop, 'Worktime(Python)')
 
         # Draw task lbl
         painter.setFont(QtGui.QFont("Ubuntu", 14))
         painter.drawText(self.rect.x() + padding, self.rect.y() + 12.5,
-                         self.rect.width() - padding, self.rect.height()-10,
+                         self.rect.width() - padding, self.rect.height() - 10,
                          QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter,
                          "Task: Lorem ipsum dolor sit amet")
 
@@ -106,21 +115,22 @@ class ActItem(QtWidgets.QGraphicsRectItem):
 
         painter.setBrush(QtCore.Qt.green)
         painter.setPen(QtCore.Qt.NoPen)
-        painter.drawEllipse(self.rect.bottomRight().x()-20, self.rect.bottomRight().y()-34, 10, 10)
-
+        painter.drawEllipse(self.rect.bottomRight().x() - 20, self.rect.bottomRight().y() - 34, 10, 10)
 
         painter.setBrush(QtCore.Qt.NoBrush)
         painter.setPen(QtCore.Qt.white)
         painter.setFont(QtGui.QFont("Ubuntu", 12))
-        painter.drawText(self.rect.x() - 25, self.rect.y()-20,
+        painter.drawText(self.rect.x() - 25, self.rect.y() - 20,
                          self.rect.width(), self.rect.height(),
                          QtCore.Qt.AlignRight | QtCore.Qt.AlignBottom,
                          "Active")
 
-        painter.drawText(self.rect.x() - padding, self.rect.y()-1,
+        painter.drawText(self.rect.x() - padding, self.rect.y() - 1,
                          self.rect.width(), self.rect.height(),
                          QtCore.Qt.AlignRight | QtCore.Qt.AlignBottom,
                          "Passed: 1:15")
+
+        del(padding)
 
     def itemChange(self, change, value):
         new_val = QtCore.QPointF()
@@ -131,14 +141,13 @@ class ActItem(QtWidgets.QGraphicsRectItem):
                     new_val.setX(value.x() + (5 - (value.x() % 5)))
                 else:
                     new_val.setX(value.x())
-                #return QtCore.QPointF(value.x(), - 0)
+                # return QtCore.QPointF(value.x(), - 0)
                 return new_val
             else:
                 new_val.setX(0)
                 return new_val
         # Accept value for item
         return super().itemChange(change, value)  # Call super
-
 
 
 class TimelineView(QtWidgets.QGraphicsView):
@@ -159,7 +168,6 @@ class TimelineView(QtWidgets.QGraphicsView):
         background_brush = QtGui.QBrush(QtGui.QColor('#d1d1d1'), QtCore.Qt.SolidPattern)
 
         painter.fillRect(rect, background_brush)
-        pen = QtGui.QPen(QtGui.QColor('#a4a4a4'))
 
 
 class TimelineScene(QtWidgets.QGraphicsScene):
@@ -170,16 +178,16 @@ class TimelineScene(QtWidgets.QGraphicsScene):
 
     def create_pattern(self):
         self.clear()
-        self.pen = QtGui.QPen(QtGui.QColor('#424242'))
-        self.pen.setCosmetic(True)
+        pen = QtGui.QPen(QtGui.QColor('#424242'))
+        pen.setCosmetic(True)
 
         for x in range(0, 7201, 5):
-            line = self.addLine(x, 0, x, 10, self.pen)
+            line = self.addLine(x, 0, x, 10, pen)
             line.setZValue(-10)
             line.setFlag(QtWidgets.QGraphicsItem.ItemIgnoresTransformations, True)
         i = 0
         for x in range(0, 7201, 300):
-            line = self.addLine(x, 0, x, 20, self.pen)
+            line = self.addLine(x, 0, x, 20, pen)
             line.setZValue(-10)
             text = self.addText('{}:00'.format(i))
             text.setPos(x, 10)

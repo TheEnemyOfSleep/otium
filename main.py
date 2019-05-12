@@ -1,6 +1,6 @@
 import sys
 from PySide2.QtWidgets import QApplication, QMainWindow, QMenuBar
-from PySide2.QtCore import Qt
+from PySide2.QtCore import Qt, QSize
 import interface
 
 __author__ = 'TEOS'
@@ -16,6 +16,7 @@ class MainWindow(QMainWindow):
         flags = Qt.FramelessWindowHint
 
         self.setGeometry(0, 0, 1120, 635)
+        self.setMinimumSize(QSize(1120, 635))
         self.setCentralWidget(interface.MainInterface(self, app))
         # self.setWindowFlags(flags)
 

@@ -42,9 +42,9 @@ class MainInterface(QtWidgets.QWidget):
         open_project_act = QtWidgets.QAction('Open...', self)
         open_project_act.setIcon(QtGui.QIcon('source/style/icons/light_theme/OpenIco(LightTheme).svg'))
 
-        fast_save_projcet_act = QtWidgets.QAction('Save', self)
-        fast_save_projcet_act.setIcon(QtGui.QIcon('source/style/icons/light_theme/SaveIco(LightTheme).svg'))
-        fast_save_projcet_act.setShortcut('Ctrl+S')
+        fast_save_project_act = QtWidgets.QAction('Save', self)
+        fast_save_project_act.setIcon(QtGui.QIcon('source/style/icons/light_theme/SaveIco(LightTheme).svg'))
+        fast_save_project_act.setShortcut('Ctrl+S')
         full_save_project_act = QtWidgets.QAction('Save As...', self)
         full_save_project_act.setIcon(QtGui.QIcon('source/style/icons/light_theme/SaveAsIco(LightTheme).svg'))
         full_save_project_act.setShortcut('Ctrl+Shift+S')
@@ -62,7 +62,7 @@ class MainInterface(QtWidgets.QWidget):
 
         file.addSeparator()
 
-        file.addAction(fast_save_projcet_act)
+        file.addAction(fast_save_project_act)
         file.addAction(full_save_project_act)
 
         file.addSeparator()
@@ -97,6 +97,111 @@ class TaskFrame(QtWidgets.QFrame):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setObjectName('Task')
+
+        # Make view task boards
+        self.view = TaskBoardsView(self)
+
+        # Make scene task boards
+        self.scene = TaskBoardsScene()
+        self.scene.setSceneRect(0, 0, self.view.width(), self.view.height())
+
+        self.view.setScene(self.scene)
+
+        # Code for create task boards
+        fm = QtGui.QFontMetrics(QtGui.QFont("Ubuntu", 22, QtGui.QFont.Bold))
+        text = 'Worktime(Python)'
+        fm.width(text)
+        task_item = TaskItem(QtCore.QRectF(10, 10, fm.width(text) + 10, 65), color=QtGui.QColor('#A33CDE'), text=text)
+        self.scene.addItem(task_item)
+
+    def resizeEvent(self, *args, **kwargs):
+        self.view.setGeometry(0, 0, self.width(), self.height())
+
+
+class TaskItem(QtWidgets.QGraphicsRectItem):
+    # Set default parameters
+    color = QtGui.QColor(QtCore.Qt.red)
+    inactive_color = QtGui.QColor()
+    text = 'Name'
+    state = True
+
+    def __init__(self, rect, **kwargs):
+        super().__init__(rect)
+        self.rect = rect
+
+        # Set flags
+        # self.setFlag(QtWidgets.QGraphicsItem.ItemIsMovable, True)
+        # self.setFlag(QtWidgets.QGraphicsItem.ItemIsSelectable, True)
+        # self.setFlag(QtWidgets.QGraphicsItem.ItemIsFocusable, True)
+
+        # Parameters for ActionItem
+        for key, value in kwargs.items():
+            if str(key) == 'color' or key == 'background':
+                self.color = value
+
+            if str(key) == 'name' or str(key) == 'text':
+                self.text = value
+
+        # print('x:{}, y:{}, width:{}, height:{}'.format(rect.x(), rect.y(), rect.width(), rect.height()))
+
+    def paint(self, painter=QtGui.QPainter(), option=QtWidgets.QStyleOptionGraphicsItem(),
+              widget=None):
+        # Set color for active and non-active element
+        if self.state is False:
+            self.inactive_color.setHsv(self.color.hue(), self.color.saturation()-50, self.color.value()-50, 255)
+            brush = QtGui.QBrush(self.inactive_color)
+        else:
+            brush = QtGui.QBrush(self.color)
+        # Draw item element for graphics item
+        painter.setRenderHint(QtGui.QPainter.HighQualityAntialiasing)
+        padding = 10
+
+        # Draw main block
+        painter.setBrush(brush)
+        painter.setPen(QtCore.Qt.NoPen)
+        painter.drawRoundedRect(self.rect, 24.0, 24.0)
+
+        # Draw text for task item
+        painter.setPen(QtCore.Qt.white)
+        painter.setFont(QtGui.QFont("Ubuntu", 22))
+        painter.drawText(self.rect.x() + padding, self.rect.y(),
+                         self.rect.width() - padding, self.rect.height(),
+                         QtCore.Qt.AlignCenter, self.text)
+
+    def mousePressEvent(self, *args, **kwargs):
+        self.state = False
+        self.update()
+        print('Press')
+
+    def mouseMoveEvent(self, *args, **kwargs):
+        print('Move')
+
+    def mouseReleaseEvent(self, *args, **kwargs):
+        self.state = True
+        self.update()
+        print('Release')
+
+
+class TaskBoardsView(QtWidgets.QGraphicsView):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignLeft)
+        self.setRenderHint(QtGui.QPainter.HighQualityAntialiasing)
+        self.setFrameStyle(QtWidgets.QFrame.NoFrame)
+
+        self.showFullScreen()
+
+    def drawBackground(self, painter, rect):
+        brush = QtGui.QBrush(QtGui.QColor('#a5a5a5'))
+
+        painter.fillRect(rect, brush)
+
+
+class TaskBoardsScene(QtWidgets.QGraphicsScene):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
 
 class ActWidget(QtWidgets.QFrame):
